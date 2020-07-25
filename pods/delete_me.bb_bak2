@@ -1,0 +1,52 @@
+Graphics 640,480
+Global width=GraphicsWidth()
+Global height=GraphicsHeight()
+Global midx=width/2
+Global midy=height/2
+
+Global frame#=width/32	
+Global nw=8 ; number of animation frames for chaser (nw= number of wiggles)
+
+Global im_home=CreateImage(frame#,frame#,nw+1)
+
+Global cframe=0; frame in chaser animation
+
+moo()
+display()
+End 
+
+Function moo()
+loop=0
+pmax=720
+peek=frame#/22
+
+;Make animation frames for chaser
+Repeat
+SetBuffer ImageBuffer(im_home,loop)
+p=0
+	Repeat
+	;Create diagonal line with superimposed sin wave with aplitude varying from frame to fram.
+	If loop<nw/2 Then amp=loop*peek Else amp=(nw-loop)*peek 
+	Plot (p*frame#/pmax)+Sin(p*2)*amp,p*frame#/pmax
+	Color 0,255,Rnd(255)
+	p=p+1
+	Until p>pmax
+loop=loop+1
+Until loop>nw
+SetBuffer BackBuffer()
+End Function 
+
+;Test image 
+Function display() 
+SetBuffer BackBuffer()
+
+Repeat 
+For loop=0 To nw
+Cls
+Text 10,10,loop
+DrawImage im_home,midx,midy,loop
+Flip
+Delay 40 
+Next
+Until KeyDown(1) 
+End Function 

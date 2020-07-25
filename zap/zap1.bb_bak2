@@ -1,0 +1,86 @@
+;Bones
+
+;go into graphics mode
+Graphics 640,480
+Global width=GraphicsWidth()
+Global height=GraphicsHeight()
+Global midx=width/2
+Global midy=height/2
+
+
+;Misc settings
+Global rots=32 ;number of orientations for ship and sprouts
+Dim trig#(rots,1)
+Global max=width 
+Dim path(max,1)
+
+
+For loop=0 To max
+path(loop,0)=loop
+path(loop,1)=loop*Sin(max)-midy 
+Next 
+
+
+;Tells Blitz Basic  to handle centring of images. (Important for rotation of images)
+AutoMidHandle True  
+
+;Load Graphics
+Global im_sig=LoadImage("data\sig1.bmp")
+Dim im_sigr(rots) ;stores ship images in different orientations
+
+
+;Data type for baddie
+Type blob
+Field x	 ;x coord
+Field y	 ;y coord
+Field dx ;x velocity
+Field dy ;y velocity
+Field o  ;orientation
+Field s	 ;species	
+End Type
+
+
+;enable double buffering
+SetBuffer BackBuffer()
+
+rotate()
+;spawn()
+
+;loop until ESC hit...
+a=0
+t=0
+While Not KeyDown(1)
+Cls
+DrawImage im_sigr(a),path(t,0),path(t,1)
+a=(a+1) Mod(rots)
+t=(t+1) Mod(max)
+Flip
+Wend
+
+End 
+
+;generates rotated image
+; To get centerimg right the statement"AutoMidHandle True" must appear in program before image loaded.
+Function rotate()
+For loop=0 To rots
+angle=loop*360/rots
+im_sigr(loop)=CopyImage(im_sig)
+RotateImage im_sigr(loop),angle
+trig#(loop,0)=Sin(angle)
+trig#(loop,1)=Cos(angle)
+If KeyDown(1) End 
+Next
+End Function 
+
+Function spawn(x,y,s)
+
+bem.blob=New blob
+bem\x=x
+bem\y=y
+bem\dx=0
+bem\dy=0
+bem\o=Rnd(rots) 
+bem\s=s
+End Function 
+
+ 

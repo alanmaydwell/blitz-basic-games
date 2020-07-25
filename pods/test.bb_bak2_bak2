@@ -1,0 +1,18 @@
+
+
+Global width=GraphicsWidth()
+n=4
+frame=width/10
+half=frame/2
+final=frame*n
+
+loop=1
+Repeat
+Color 255,0,0
+Oval (loop-1)*frame,0,frame,frame,0
+Color 0,0,255
+Oval  half+(loop-1)*frame,half,frame/loop,frame/loop,0
+loop=loop+1
+Until loop>n 
+
+WaitKey

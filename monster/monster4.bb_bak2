@@ -1,0 +1,98 @@
+;Monster
+
+;go into graphics mode
+Graphics 640,480
+Global width=GraphicsWidth()
+Global height=GraphicsHeight()
+Global midx=width/2
+Global midy=height/2
+
+;enable double buffering
+SetBuffer BackBuffer()
+
+txt$="Beware, Beware! Monster word attack !"
+
+Type monst
+Field x
+Field y
+Field oldx
+Field oldy
+Field dx
+Field dy	
+Field c$	;Stores single character extracted from string
+Field cp	;Character position from text
+Field final	;flag for final character in text
+End Type
+
+For mult=1 To 8
+create_monsters(txt$,mult)
+Next 
+
+;Main Loop. Repeats unless ESC hit.
+While Not KeyDown(1)
+Cls
+update_monsters()
+Flip 
+Wend
+End
+
+
+;**********************************************************
+; Functions start here 
+;**********************************************************
+
+
+Function create_monsters(A$,mult)
+length=Len(A$)
+For loop=1 To length 
+abc.monst=New monst
+abc\x=100-loop*16
+abc\y=50*mult
+abc\dx=6
+abc\dy=mult
+abc\c$=Mid$(A$,loop,1)
+abc\cp=loop
+If loop =length Then 
+abc\final=True
+Else abc\final=False
+End If 
+Next  
+End Function 
+
+
+;Updates and plots the "monsters"
+Function update_monsters()
+For abc.monst =Each monst
+
+Color 255-abc\cp*6,255-abc\cp*6,250
+Text abc\x,abc\y,abc\c$
+
+abc\oldx=abc\x
+abc\oldy=abc\y
+
+If abc\cp=1 Then
+;updates the lead character
+abc\x=abc\x+abc\dx
+abc\y=abc\y+abc\dy
+abc\dx=confine(abc\x,abc\dx,0,width)
+abc\dy=confine(abc\y,abc\dy,0,height)
+
+;updates the following characters, each of which takes the previous character's case
+Else  
+abc=Before abc; moves pointer forward to read the previous character's old coordinates
+tempx=abc\oldx
+tempy=abc\oldy
+abc=After abc; restores pointer to current position
+abc\x=tempx
+abc\y=tempy
+End If 
+Next 
+End Function
+
+;Stops x# from exceeding min and max values by ensuring direction of velocity is towards the boundary if object leaves the edge.
+;Used to stop things leaving the edge of the screen.
+Function confine#(x#,dx#,min,max)
+If x#<min And dx#<0 Then dx#=-dx#
+If x#>max And dx#>0 Then dx#=-dx#
+Return dx#
+End Function

@@ -1,0 +1,121 @@
+;Zap
+
+;go into graphics mode
+Graphics 640,480
+Global width=GraphicsWidth()
+Global height=GraphicsHeight()
+Global midx=width/2
+Global midy=height/2
+
+;Misc settings
+Global rots=32 ;number of orientations for spinning things
+Dim trig#(rots,1)
+Global level=1 
+
+
+;Create paths
+Global max=width 
+Dim path(max,2)
+
+For loop=0 To max
+path(loop,0)=loop
+path(loop,1)=150*Sin(90+loop/2)+(.8*midy)
+path(loop,2)=150*Cos(90+loop/2)+(.8*midy)
+Next 
+
+
+;Load Graphics
+Global im_back=LoadImage("data\eden3.jpg")
+;Tells Blitz Basic  to handle centring of images. (Important for rotation of images)
+AutoMidHandle True 
+Global im_sig=LoadImage("data\sig2.bmp")
+Global im_pris=LoadImage("data\dsotm2.bmp")
+
+Dim im_sigr(rots) ;stores images in different orientations
+Dim im_prisr(rots);ditto
+
+;Data type for baddie
+Type blob
+Field x	 ;x coord
+Field xo ;x off set (used for formations)
+Field y	 ;y coord
+Field yo ;y off set
+Field dx ;x velocity
+Field dy ;y velocity
+Field o  ;orientation
+Field p	 ;position in path
+Field dp ;movement rate through path
+Field im ;image type	
+End Type
+
+
+;enable double buffering
+SetBuffer BackBuffer()
+
+rotate()
+
+For loop=0 To 6
+z=loop*60
+spawn(path(0,0),path(0,1),0,0,z,1)
+spawn(path(0,0),path(0,1),0,50,z,2)
+spawn(path(0,0),path(0,1),0,100,z,1)
+spawn(path(0,0),path(0,1),0,150,z,2)
+Next 
+
+
+;loop until ESC hit...
+While Not KeyDown(1)
+DrawImage im_back,0,0
+update_blob()
+Flip
+Wend
+End 
+
+
+;#######################################################################
+;Functions Begin Here
+;#######################################################################
+
+;generates rotated image
+; To get centerimg right the statement"AutoMidHandle True" must appear in program before image loaded.
+Function rotate()
+For loop=0 To rots
+angle=loop*360/rots
+im_sigr(loop)=CopyImage(im_sig)
+RotateImage im_sigr(loop),angle
+im_prisr(loop)=CopyImage(im_pris)
+RotateImage im_prisr(loop),angle
+trig#(loop,0)=Sin(angle)
+trig#(loop,1)=Cos(angle)
+If KeyDown(1) End 
+Next
+End Function 
+
+Function spawn(x,y,xo,yo,p,im)
+bem.blob=New blob
+bem\x=x
+bem\xo=xo
+bem\y=y
+bem\yo=yo
+bem\dx=0
+bem\dy=0
+bem\o=Rnd(rots) 
+bem\p=p
+bem\dp=4
+bem\im=im
+End Function 
+
+Function update_blob()
+For bem.blob = Each blob
+bem\x=bem\xo+path(bem\p,0)
+bem\y=bem\yo+path(bem\p,1)
+
+If bem\im=1 Then DrawImage im_sigr(bem\o),bem\x,bem\y
+If bem\im=2 Then DrawImage im_prisr(bem\o),bem\x,bem\y
+
+bem\p=bem\p+bem\dp 
+If bem\p>max Then bem\p=max:bem\dp=-bem\dp
+If bem\p<0 Then bem\p=0:bem\dp=-bem\dp
+bem\o=(bem\o+1) Mod(rots)
+Next
+End Function 
